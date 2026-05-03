@@ -80,7 +80,7 @@ export const PivotSection: React.FC = () => {
   }, [grid, rowField, valueField, headers]);
 
   return (
-    <div className="h-full flex flex-col p-8 space-y-8 bg-gray-50/50 overflow-auto relative">
+    <div className="h-full flex flex-col p-4 md:p-8 space-y-8 bg-gray-50/50 overflow-auto relative">
       {/* Tutorial Overlay */}
       <AnimatePresence>
         {tutorialStep >= 0 && (

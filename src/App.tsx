@@ -17,11 +17,11 @@ import { ChartSection } from './components/ChartSection';
 import { PivotSection } from './components/PivotSection';
 import { useExcelStore } from './store';
 import { MISSIONS } from './constants';
-import { motion } from 'motion/react';
-import { Layers, BookOpen, Zap } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
+import { Layers, BookOpen, Zap, Menu, X } from 'lucide-react';
 
 export default function App() {
-  const { grid, activeTab, completedMissions, currentMission } = useExcelStore();
+  const { grid, activeTab, completedMissions, currentMission, sidebarOpen, toggleSidebar } = useExcelStore();
   const filledCellsCount = Object.keys(grid).length;
   const progressPercent = Math.round((completedMissions.length / MISSIONS.length) * 100);
 
@@ -30,6 +30,12 @@ export default function App() {
       {/* App Header */}
       <header className="h-10 bg-excel-green text-white px-4 flex items-center justify-between shrink-0 shadow-sm z-50">
         <div className="flex items-center gap-2">
+          <button 
+            onClick={toggleSidebar}
+            className="p-1 hover:bg-white/10 rounded md:hidden"
+          >
+            {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </button>
           <span className="font-bold text-sm tracking-tight text-white">Excel</span>
           <span className="font-normal text-sm tracking-tight text-white/90">Simulator</span>
           <span className="opacity-70 text-[11px] ml-4 hidden md:inline font-normal shrink-0">Data Analyst Training v2.0</span>
@@ -44,7 +50,7 @@ export default function App() {
 
       <Toolbar />
       
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 overflow-hidden relative">
         <div className="flex-1 flex flex-col min-w-0 bg-white">
           {activeTab === 'training' && !currentMission ? (
             <main className="flex-1 overflow-auto bg-excel-bg p-8">

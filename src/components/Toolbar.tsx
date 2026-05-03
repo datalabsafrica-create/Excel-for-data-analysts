@@ -73,7 +73,7 @@ export const Toolbar: React.FC = () => {
   return (
     <div className="bg-white border-b border-excel-border shrink-0">
       {/* Menu Bar (File, Home, Insert...) */}
-      <div className="flex items-center gap-6 px-4 h-8 bg-white text-excel-text text-[13px] font-normal border-b border-excel-border/50">
+      <div className="flex items-center gap-4 px-4 h-8 bg-white text-excel-text text-[13px] font-normal border-b border-excel-border/50 overflow-x-auto no-scrollbar whitespace-nowrap">
         {menuItems.map(item => (
           <div 
             key={item}
@@ -90,7 +90,7 @@ export const Toolbar: React.FC = () => {
       </div>
 
       {/* Main Ribbon */}
-      <div className="flex items-center gap-6 px-4 h-16 bg-white overflow-x-auto no-scrollbar">
+      <div className="flex items-center gap-6 px-4 h-16 bg-white overflow-x-auto no-scrollbar whitespace-nowrap min-w-0">
         {ribbonTab === 'File' && (
           <div className="flex gap-4">
             <div className="flex flex-col gap-1 items-center justify-center border-r border-excel-border pr-6 h-12">

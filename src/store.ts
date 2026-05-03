@@ -16,6 +16,7 @@ interface ExcelStore {
   currentMission: Mission | null;
   completedMissions: string[];
   history: GridData[];
+  sidebarOpen: boolean;
   
   updateCell: (id: string, formula: string) => void;
   setSelection: (selection: Selection) => void;
@@ -25,6 +26,7 @@ interface ExcelStore {
   startMission: (missionId: string) => void;
   checkMission: () => boolean;
   clearGrid: () => void;
+  toggleSidebar: () => void;
 }
 
 export const useExcelStore = create<ExcelStore>((set, get) => ({
@@ -35,6 +37,7 @@ export const useExcelStore = create<ExcelStore>((set, get) => ({
   currentMission: null,
   completedMissions: [],
   history: [],
+  sidebarOpen: true,
 
   updateCell: (id: string, formula: string) => {
     set((state) => {
@@ -104,4 +107,6 @@ export const useExcelStore = create<ExcelStore>((set, get) => ({
   },
 
   clearGrid: () => set({ grid: {} }),
+
+  toggleSidebar: () => set((state) => ({ sidebarOpen: !state.sidebarOpen })),
 }));
