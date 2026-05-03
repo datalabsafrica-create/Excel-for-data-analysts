@@ -1,0 +1,19 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Segoe UI", -apple-system, BlinkMacSystemFont, "Roboto", "Helvetica Neue", Arial, sans-serif;
+  
+  --color-excel-green: #217346;
+  --color-excel-green-dark: #107c41;
+  --color-excel-light-green: #e9f5ef;
+  --color-excel-border: #d4d4d4;
+  --color-excel-bg: #f3f2f1;
+  --color-excel-text: #323130;
+  --color-excel-header-bg: #f8f8f8;
+}
+
+@layer base {
+  body {
+    @apply bg-excel-bg text-excel-text font-sans;
+  }
+}

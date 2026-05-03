@@ -1,0 +1,6 @@
+{
+  "name": "Excel Simulator for Data Analysts",
+  "description": "A high-fidelity Excel-like environment with guided training missions, formula engine, pivot tables, and data visualization tools.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["Spreadsheet Grid", "Formula Engine", "Data Analysis Training", "Pivot Tables", "Charts"]
+}
