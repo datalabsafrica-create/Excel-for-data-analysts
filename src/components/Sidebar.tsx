@@ -155,7 +155,7 @@ export const Sidebar: React.FC = () => {
                         <p className="text-[10px] text-yellow-700 mb-3 leading-tight relative z-10">Watch a short ad to permanently unlock all advanced modules and projects.</p>
                         <button 
                           onClick={() => {
-                            // [INSERT_SMARTLINK_HERE]
+                            // [https://www.profitablecpmratenetwork.com/eptfdgegw?key=9029ed441555986ae5243084e752e0d5]
                             // Examples:
                             // window.open('https://your-smartlink-url.com', '_blank');
                             unlockModules();
