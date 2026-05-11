@@ -15,7 +15,8 @@ import {
   HelpCircle,
   Play,
   RotateCcw,
-  AlertCircle
+  AlertCircle,
+  Lock
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -29,7 +30,9 @@ export const Sidebar: React.FC = () => {
     completedMissions,
     clearGrid,
     sidebarOpen,
-    toggleSidebar
+    toggleSidebar,
+    modulesUnlocked,
+    unlockModules
   } = useExcelStore();
 
   // Handle closing sidebar on mobile when mission starts or tab changes
@@ -142,6 +145,27 @@ export const Sidebar: React.FC = () => {
                       <h3 className="text-[12px] font-bold text-excel-green uppercase tracking-wider">Course Curriculum</h3>
                       <span className="text-[10px] font-bold text-excel-green">{completedMissions.length}/{MISSIONS.length} Done</span>
                     </div>
+
+                    {!modulesUnlocked && (
+                      <div className="bg-yellow-50 border border-yellow-200 rounded p-4 mb-4 shadow-sm relative overflow-hidden">
+                        <div className="absolute top-0 right-0 p-2 opacity-10">
+                          <Lock className="w-16 h-16 text-yellow-900" />
+                        </div>
+                        <h4 className="font-bold text-[12px] text-yellow-800 mb-1 flex items-center gap-1"><Lock className="w-3.5 h-3.5" /> Unlock Premium Course</h4>
+                        <p className="text-[10px] text-yellow-700 mb-3 leading-tight relative z-10">Watch a short ad to permanently unlock all advanced modules and projects.</p>
+                        <button 
+                          onClick={() => {
+                            // [INSERT_SMARTLINK_HERE]
+                            // Examples:
+                            // window.open('https://your-smartlink-url.com', '_blank');
+                            unlockModules();
+                          }}
+                          className="w-full bg-yellow-400 hover:bg-yellow-500 text-yellow-900 font-bold py-2 rounded text-[11px] transition-colors flex items-center justify-center gap-2 relative z-10 shadow-sm"
+                        >
+                          <Play className="w-3.5 h-3.5 fill-current" /> Watch Ad to Unlock All
+                        </button>
+                      </div>
+                    )}
                     
                     {Array.from(new Set(MISSIONS.map(m => m.module))).map(moduleName => (
                       <div key={moduleName} className="space-y-2">
@@ -149,25 +173,34 @@ export const Sidebar: React.FC = () => {
                          <div className="space-y-2">
                             {MISSIONS.filter(m => m.module === moduleName).map(m => {
                               const isCompleted = completedMissions.includes(m.id);
+                              const isLocked = !modulesUnlocked && m.id !== MISSIONS[0].id;
+                              
                               return (
                                 <button
                                   key={m.id}
-                                  onClick={() => handleStartMission(m.id)}
+                                  onClick={() => isLocked ? null : handleStartMission(m.id)}
                                   className={`w-full text-left p-2.5 rounded border transition-all group relative overflow-hidden ${
-                                    isCompleted 
-                                      ? 'border-excel-green bg-excel-green/5 opacity-80' 
-                                      : 'border-excel-border hover:border-excel-green hover:bg-excel-light-green'
+                                    isLocked
+                                      ? 'border-gray-200 bg-gray-50 opacity-50 cursor-not-allowed'
+                                      : isCompleted 
+                                        ? 'border-excel-green bg-excel-green/5 opacity-80 hover:bg-excel-green/10' 
+                                        : 'border-excel-border hover:border-excel-green hover:bg-excel-light-green'
                                   }`}
                                 >
                                   <div className="flex justify-between items-center mb-0.5">
                                     <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded border ${
+                                      isLocked ? 'text-gray-400 border-gray-200 bg-gray-100' :
                                       m.category === 'Project' ? 'text-orange-600 bg-orange-50 border-orange-200' : 'text-excel-green bg-excel-light-green border-excel-green/20'
                                     }`}>
                                       {m.category}
                                     </span>
-                                    {isCompleted && <CheckCircle2 className="w-3 h-3 text-excel-green" />}
+                                    {isLocked ? (
+                                      <Lock className="w-3 h-3 text-gray-400" />
+                                    ) : isCompleted && (
+                                      <CheckCircle2 className="w-3 h-3 text-excel-green" />
+                                    )}
                                   </div>
-                                  <h4 className={`font-bold text-[12px] leading-tight ${isCompleted ? 'text-excel-green' : 'text-excel-text'}`}>{m.title}</h4>
+                                  <h4 className={`font-bold text-[12px] leading-tight ${isLocked ? 'text-gray-400' : isCompleted ? 'text-excel-green' : 'text-excel-text'}`}>{m.title}</h4>
                                 </button>
                               );
                             })}
@@ -302,10 +335,20 @@ export const Sidebar: React.FC = () => {
                                 <motion.button
                                   initial={{ opacity: 0, y: 10 }}
                                   animate={{ opacity: 1, y: 0 }}
-                                  onClick={() => handleStartMission(nextMission.id)}
+                                  onClick={() => {
+                                    if (!modulesUnlocked && nextMission.id !== MISSIONS[0].id) {
+                                      handleStartMission(''); // go back to curriculum to show the ad lock
+                                    } else {
+                                      handleStartMission(nextMission.id);
+                                    }
+                                  }}
                                   className="w-full bg-excel-green text-white py-2.5 rounded text-[12px] font-bold hover:bg-excel-green-dark transition-all shadow-md flex items-center justify-center gap-2 mt-2 border-2 border-white"
                                 >
-                                  Next Module: {nextMission.title} <Play className="w-3 h-3 fill-current" />
+                                  {!modulesUnlocked && nextMission.id !== MISSIONS[0].id ? (
+                                    <>Unlock Premium to Continue <Lock className="w-3 h-3 fill-current" /></>
+                                  ) : (
+                                    <>Next Module: {nextMission.title} <Play className="w-3 h-3 fill-current" /></>
+                                  )}
                                 </motion.button>
                               )}
   
