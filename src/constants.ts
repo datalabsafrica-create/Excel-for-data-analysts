@@ -11,6 +11,7 @@ export const INITIAL_COLS = 26; // A-Z
 export const COL_LABELS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
 
 export const SAMPLE_DATASETS = {
+  empty: [],
   sales: [
     { Date: '2023-01-01', Region: 'North', Product: 'Laptop', Sales: 1200, Units: 1 },
     { Date: '2023-01-02', Region: 'South', Product: 'Mouse', Sales: 50, Units: 2 },
@@ -39,7 +40,7 @@ export const MISSIONS: Mission[] = [
     description: 'Learn the basics of moving around and entering data.',
     lesson: 'Excel is a grid of cells identified by Column (Letters) and Row (Numbers). To enter data, simply click a cell and start typing. In data analysis, the first row is usually your "headers" which describe what the data in each column is.',
     objective: 'Enter "Region" in A1, "Sales" in B1, and "North" in A2.',
-    dataset: 'sales',
+    dataset: 'empty',
     initialData: {},
     hint: 'Just click a cell and type. Press Enter to confirm.',
     expectedAnswer: 'A1="Region", B1="Sales", A2="North"',
@@ -52,14 +53,14 @@ export const MISSIONS: Mission[] = [
     category: 'Beginner',
     description: 'Calculate the total and average revenue for the financial year.',
     lesson: 'Formulas always start with an equal sign (=). SUM(Range) adds up all numbers in a selection. AVERAGE(Range) calculates the mean. For example, =SUM(A1:A5) adds everything from cell A1 to A5.',
-    objective: 'In cell C7 enter =SUM(C2:C6). In C8 enter =AVERAGE(C2:C6).',
+    objective: 'In cell B7 enter =SUM(B2:B6). In B8 enter =AVERAGE(B2:B6).',
     dataset: 'finance',
     initialData: {},
     hint: 'SUM adds up numbers; AVERAGE finds the mean.',
-    expectedAnswer: 'C7 should be 31500, C8 should be 6300',
+    expectedAnswer: 'B7 should be 31500, B8 should be 6300',
     checkSolution: (grid) => {
-      const sum = grid['C7']?.value;
-      const avg = grid['C8']?.value;
+      const sum = grid['B7']?.value;
+      const avg = grid['B8']?.value;
       return Number(sum) === 31500 && Number(avg) === 6300;
     }
   },
@@ -72,12 +73,12 @@ export const MISSIONS: Mission[] = [
     category: 'Intermediate',
     description: 'Clean up messy product names by converting them to uppercase.',
     lesson: 'Cleaning data is 80% of an analyst\'s job. UPPER(cell) converts text to ALL CAPS. This is useful for standardizing names like "laptop", "Laptop", and "LAPTOP" so they map correctly in your analysis.',
-    objective: 'In cell E2, use =UPPER(B2) to clean the first product category.',
+    objective: 'In cell F2, use =UPPER(C2) to clean the first product name.',
     dataset: 'sales',
     initialData: {},
-    hint: 'UPPER() makes text all caps; TRIM() removes extra spaces.',
-    expectedAnswer: 'E2 should contain the capitalized value from B2 (e.g. "NORTH")',
-    checkSolution: (grid) => String(grid['E2']?.value) === String(grid['B2']?.value).toUpperCase()
+    hint: 'UPPER() makes text all caps (e.g. =UPPER(C2)).',
+    expectedAnswer: 'F2 should contain the capitalized value from C2 (e.g. "LAPTOP"). Formula: =UPPER(C2)',
+    checkSolution: (grid) => String(grid['F2']?.formula).toUpperCase().includes('UPPER') && String(grid['F2']?.value) === String(grid['C2']?.value).toUpperCase()
   },
 
   // MODULE 3: Advanced Functions
@@ -88,12 +89,12 @@ export const MISSIONS: Mission[] = [
     category: 'Intermediate',
     description: 'Categorize sales performance against a target of 1000 units.',
     lesson: 'IF functions allow Excel to make decisions. The syntax is =IF(test, value_if_true, value_if_false). For example, =IF(A1>10, "Yes", "No") checks if A1 is greater than 10.',
-    objective: 'In E2, use: =IF(C2>1000,"High","Low"). (Row 2 has 1200 units).',
+    objective: 'In F2, use: =IF(D2>1000,"High","Low"). (Row 2 has 1200 sales).',
     dataset: 'sales',
     initialData: {},
     hint: '=IF(condition, "Result If True", "Result If False")',
-    expectedAnswer: 'E2 should be "High" because C2 (1200) > 1000',
-    checkSolution: (grid) => String(grid['E2']?.value).toLowerCase() === 'high'
+    expectedAnswer: 'F2 should be "High" because D2 (1200) > 1000',
+    checkSolution: (grid) => String(grid['F2']?.formula).toUpperCase().includes('IF') && String(grid['F2']?.value).toLowerCase() === 'high'
   },
   {
     id: 'm3-2',
@@ -102,12 +103,12 @@ export const MISSIONS: Mission[] = [
     category: 'Intermediate',
     description: 'Find data instantly across large tables.',
     lesson: 'VLOOKUP stands for "Vertical Lookup". It searches for a value in the first column of a table and returns a value in the same row from a column you specify. =VLOOKUP(lookup_val, range, col_index, [exact_match]). Use 0 for exact match.',
-    objective: 'In G1, find Sales for "North" using =VLOOKUP("North", A2:D8, 4, 0)',
+    objective: 'In G1, find Sales for "East" using =VLOOKUP("East", B2:D8, 3, 0)',
     dataset: 'sales',
     initialData: {},
     hint: 'VLOOKUP needs: lookup value, range, column index, and 0 for exact match.',
-    expectedAnswer: 'G1 should be 80. Formula: =VLOOKUP("North", A2:D8, 4, 0)',
-    checkSolution: (grid) => Number(grid['G1']?.value) === 80
+    expectedAnswer: 'G1 should be 300. Formula: =VLOOKUP("East", B2:D8, 3, 0)',
+    checkSolution: (grid) => String(grid['G1']?.formula).toUpperCase().includes('VLOOKUP') && Number(grid['G1']?.value) === 300
   },
 
   // MODULE 4: Pivot Tables
@@ -152,8 +153,8 @@ export const MISSIONS: Mission[] = [
     dataset: 'sales',
     initialData: {},
     hint: 'LEN, MAX, MIN and ROUND are essential for data profiling.',
-    expectedAnswer: 'H1: =LEN(B2), H2: =MAX(D2:D8)',
-    checkSolution: (grid) => !!grid['H1'] && !!grid['H2']
+    expectedAnswer: 'H1: =LEN(B2) which is 5, H2: =MAX(D2:D8) which is 1200',
+    checkSolution: (grid) => Number(grid['H1']?.value) === 5 && Number(grid['H2']?.value) === 1200
   },
 
   // MODULE 7: REAL WORLD PROJECTS
@@ -177,12 +178,12 @@ export const MISSIONS: Mission[] = [
     category: 'Project',
     description: 'Check for tax inconsistencies in the report.',
     lesson: 'Accountants make mistakes! As an analyst, you often audit financial data. Use IF statements to flag any tax entries that don\'t match the expected percentage based on revenue.',
-    objective: 'Flag anything with tax > 12% using =IF(D2/B2 > 0.12, "Review", "OK").',
+    objective: 'In E2, flag if Tax is > 11% of Revenue using =IF(D2/B2 > 0.11, "Review", "OK").',
     dataset: 'finance',
     initialData: {},
-    hint: 'D column is Tax, B is Revenue.',
-    expectedAnswer: '=IF(D2/B2 > 0.12, "Review", "OK")',
-    checkSolution: (grid) => Object.keys(grid).some(k => k.startsWith('E') && String(grid[k]?.formula).includes('IF'))
+    hint: 'D is Tax, B is Revenue. E2 is the target cell.',
+    expectedAnswer: '=IF(D2/B2 > 0.11, "Review", "OK")',
+    checkSolution: (grid) => String(grid['E2']?.formula).toUpperCase().includes('IF') && !!grid['E2']?.value
   },
   {
     id: 'p3',

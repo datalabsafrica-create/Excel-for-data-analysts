@@ -86,68 +86,57 @@ const functionMap: Record<string, (args: string[], grid: GridData) => CellValue>
   },
 
   ROUND: (args, grid) => {
-    const val = evaluateFormula(args[0], grid);
-    const precision = args[1] ? Number(evaluateFormula(args[1], grid)) : 0;
+    const val = evaluateFormula(args[0], grid, true);
+    const precision = args[1] ? Number(evaluateFormula(args[1], grid, true)) : 0;
     return typeof val === 'number' ? Number(val.toFixed(precision)) : '#VALUE!';
   },
 
   ABS: (args, grid) => {
-    const val = Number(evaluateFormula(args[0], grid));
+    const val = Number(evaluateFormula(args[0], grid, true));
     return isNaN(val) ? '#VALUE!' : Math.abs(val);
   },
 
   CONCAT: (args, grid) => {
-    return args.map(arg => evaluateFormula(arg, grid)).join('');
+    return args.map(arg => evaluateFormula(arg, grid, true)).join('');
   },
 
   UPPER: (args, grid) => {
-    const val = evaluateFormula(args[0], grid);
+    const val = evaluateFormula(args[0], grid, true);
     return String(val).toUpperCase();
   },
 
   LOWER: (args, grid) => {
-    const val = evaluateFormula(args[0], grid);
+    const val = evaluateFormula(args[0], grid, true);
     return String(val).toLowerCase();
   },
 
   LEN: (args, grid) => {
-    const val = evaluateFormula(args[0], grid);
+    const val = evaluateFormula(args[0], grid, true);
     return String(val).length;
   },
 
   TRIM: (args, grid) => {
-    const val = evaluateFormula(args[0], grid);
+    const val = evaluateFormula(args[0], grid, true);
     return String(val).trim();
   },
 
   IF: (args, grid) => {
     const conditionStr = args[0];
-    const trueVal = evaluateFormula(args[1], grid);
-    const falseVal = evaluateFormula(args[2], grid);
+    const trueVal = evaluateFormula(args[1], grid, true);
+    const falseVal = evaluateFormula(args[2], grid, true);
 
-    const match = conditionStr.match(/([A-Z0-9]+)\s*([><=]=?|!=)\s*(.+)/i);
-    if (!match) return '#ERROR!';
-
-    const left = evaluateFormula(match[1].trim(), grid);
-    const op = match[2];
-    const rightRaw = match[3].trim();
-    const right = isNaN(Number(rightRaw)) ? rightRaw.replace(/["']/g, '') : Number(rightRaw);
-
-    let result = false;
-    if (op === '>') result = (left as any) > right;
-    if (op === '<') result = (left as any) < right;
-    if (op === '=') result = left == right;
-    if (op === '!=') result = left != right;
-    if (op === '>=') result = (left as any) >= right;
-    if (op === '<=') result = (left as any) <= right;
-
-    return result ? trueVal : falseVal;
+    try {
+      const result = evaluateFormula(conditionStr, grid, true);
+      return result ? trueVal : falseVal;
+    } catch {
+      return '#ERROR!';
+    }
   },
 
   VLOOKUP: (args, grid) => {
-    const lookupValue = evaluateFormula(args[0], grid);
+    const lookupValue = evaluateFormula(args[0], grid, true);
     const rangeStr = args[1];
-    const colIndex = Number(evaluateFormula(args[2], grid));
+    const colIndex = Number(evaluateFormula(args[2], grid, true));
     
     if (!rangeStr.includes(':')) return '#REF!';
     const [start, end] = rangeStr.split(':');
@@ -170,20 +159,29 @@ const functionMap: Record<string, (args: string[], grid: GridData) => CellValue>
 /**
  * Main Evaluator
  */
-export const evaluateFormula = (content: string, grid: GridData): CellValue => {
+export const evaluateFormula = (content: string, grid: GridData, isNested = false): CellValue => {
   if (content === null || content === undefined) return null;
-  const strContent = String(content);
+  const strContent = String(content).trim();
   
-  if (!strContent.startsWith('=')) {
+  let formula = strContent;
+  
+  if (strContent.startsWith('=')) {
+    formula = strContent.substring(1).trim();
+  } else if (!isNested) {
     if (!isNaN(Number(strContent)) && strContent.trim() !== '') {
       return Number(strContent);
     }
-    // Strip surrounding quotes if they exist
-    return strContent.replace(/^["'](.*)["']$/, '$1');
+    return strContent;
+  } else {
+    // It's nested. It might be a string literal, number, or expression.
+    if (/^["'].*["']$/.test(strContent)) {
+      return strContent.replace(/^["'](.*)["']$/, '$1');
+    }
+    if (!isNaN(Number(strContent)) && strContent.trim() !== '') {
+      return Number(strContent);
+    }
   }
 
-  const formula = strContent.substring(1).trim();
-  
   const funcMatch = formula.match(/^([A-Z]+)\((.*)\)$/i);
   if (funcMatch) {
     const funcName = funcMatch[1].toUpperCase();
@@ -221,12 +219,19 @@ export const evaluateFormula = (content: string, grid: GridData): CellValue => {
     return grid[refMatch[1].toUpperCase()]?.value ?? 0;
   }
 
+  // Expression evaluation (math/logical)
   try {
     let evalExpr = formula;
+    
+    // Replace single = with === for JS evaluation, but don't touch >=, <=, !=, or existing ==/===
+    // This allows IF(A1="Yes", ...) to work correctly.
+    evalExpr = evalExpr.replace(/(?<![<>!=])=(?!=)/g, '===');
+
     const allRefs = formula.match(/([A-Z]+[0-9]+)/gi) || [];
     allRefs.forEach(ref => {
       const val = grid[ref.toUpperCase()]?.value ?? 0;
-      evalExpr = evalExpr.replace(new RegExp(ref, 'g'), String(val));
+      const safeVal = typeof val === 'string' ? `"${val}"` : String(val);
+      evalExpr = evalExpr.replace(new RegExp(`\\b${ref}\\b`, 'gi'), safeVal);
     });
     return new Function(`return ${evalExpr}`)();
   } catch (e) {

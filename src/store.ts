@@ -23,7 +23,7 @@ interface ExcelStore {
   setSelection: (selection: Selection) => void;
   setActiveTab: (tab: TabType) => void;
   setRibbonTab: (tab: string) => void;
-  loadDataset: (datasetName: 'sales' | 'finance') => void;
+  loadDataset: (datasetName: 'sales' | 'finance' | 'empty') => void;
   startMission: (missionId: string) => void;
   checkMission: () => boolean;
   clearGrid: () => void;
@@ -91,7 +91,7 @@ export const useExcelStore = create<ExcelStore>((set, get) => ({
     const mission = MISSIONS.find(m => m.id === missionId);
     if (mission) {
       set({ currentMission: mission });
-      get().loadDataset(mission.dataset as 'sales' | 'finance');
+      get().loadDataset(mission.dataset as 'sales' | 'finance' | 'empty');
     } else {
       set({ currentMission: null, activeTab: 'training' });
     }

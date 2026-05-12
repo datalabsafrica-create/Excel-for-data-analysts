@@ -51,6 +51,36 @@ export const Sidebar: React.FC = () => {
   const [error, setError] = useState(false);
   const [viewMode, setViewMode] = useState<'lesson' | 'task'>('lesson');
 
+  const [adPlaying, setAdPlaying] = useState(false);
+  const [adTimeLeft, setAdTimeLeft] = useState(10);
+  const [pendingMissionId, setPendingMissionId] = useState<string | null>(null);
+
+  React.useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (adPlaying && adTimeLeft > 0) {
+      timer = setTimeout(() => {
+        setAdTimeLeft(adTimeLeft - 1);
+      }, 1000);
+    } else if (adPlaying && adTimeLeft <= 0) {
+      setAdPlaying(false);
+      unlockModules();
+      if (pendingMissionId) {
+        handleStartMission(pendingMissionId);
+        setPendingMissionId(null);
+      }
+    }
+    return () => clearTimeout(timer);
+  }, [adPlaying, adTimeLeft, unlockModules, pendingMissionId]);
+
+  const startAd = (missionIdToStart?: string) => {
+    setAdPlaying(true);
+    setAdTimeLeft(10);
+    setPendingMissionId(missionIdToStart || null);
+    
+    // [INSERT_SMARTLINK_HERE]
+    // window.open('https://your-smartlink-url.com', '_blank');
+  };
+
   const currentMissionIndex = MISSIONS.findIndex(m => m.id === currentMission?.id);
   const nextMission = MISSIONS[currentMissionIndex + 1];
 
@@ -81,6 +111,31 @@ export const Sidebar: React.FC = () => {
 
   return (
     <>
+      <AnimatePresence>
+        {adPlaying && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] bg-black/90 flex flex-col items-center justify-center text-white p-4 text-center backdrop-blur-sm"
+          >
+            <Play className="w-16 h-16 text-yellow-400 mb-6 animate-pulse" />
+            <h2 className="text-2xl font-bold mb-2">Advertisement</h2>
+            <p className="text-gray-300 mb-8 max-w-md">Please support the creator by viewing this sponsored message. Your content will unlock shortly.</p>
+            
+            <div className="relative w-64 h-2 bg-gray-800 rounded-full overflow-hidden mb-4">
+              <div 
+                className="absolute top-0 left-0 h-full bg-yellow-400 transition-all duration-1000 ease-linear"
+                style={{ width: `${((10 - adTimeLeft) / 10) * 100}%` }}
+              />
+            </div>
+            <div className="font-mono text-xl font-bold text-yellow-400">
+              {adTimeLeft}s
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <AnimatePresence>
         {sidebarOpen && (
           <motion.div 
@@ -154,12 +209,7 @@ export const Sidebar: React.FC = () => {
                         <h4 className="font-bold text-[12px] text-yellow-800 mb-1 flex items-center gap-1"><Lock className="w-3.5 h-3.5" /> Unlock Premium Course</h4>
                         <p className="text-[10px] text-yellow-700 mb-3 leading-tight relative z-10">Watch a short ad to permanently unlock all advanced modules and projects.</p>
                         <button 
-                          onClick={() => {
-                            // [INSERT_SMARTLINK_HERE]
-                            // Examples:
-                            // window.open('https://your-smartlink-url.com', '_blank');
-                            unlockModules();
-                          }}
+                          onClick={() => startAd()}
                           className="w-full bg-yellow-400 hover:bg-yellow-500 text-yellow-900 font-bold py-2 rounded text-[11px] transition-colors flex items-center justify-center gap-2 relative z-10 shadow-sm"
                         >
                           <Play className="w-3.5 h-3.5 fill-current" /> Watch Ad to Unlock All
@@ -178,10 +228,10 @@ export const Sidebar: React.FC = () => {
                               return (
                                 <button
                                   key={m.id}
-                                  onClick={() => isLocked ? null : handleStartMission(m.id)}
+                                  onClick={() => isLocked ? startAd(m.id) : handleStartMission(m.id)}
                                   className={`w-full text-left p-2.5 rounded border transition-all group relative overflow-hidden ${
                                     isLocked
-                                      ? 'border-gray-200 bg-gray-50 opacity-50 cursor-not-allowed'
+                                      ? 'border-gray-200 bg-gray-50 opacity-60 hover:bg-gray-100'
                                       : isCompleted 
                                         ? 'border-excel-green bg-excel-green/5 opacity-80 hover:bg-excel-green/10' 
                                         : 'border-excel-border hover:border-excel-green hover:bg-excel-light-green'
@@ -337,7 +387,7 @@ export const Sidebar: React.FC = () => {
                                   animate={{ opacity: 1, y: 0 }}
                                   onClick={() => {
                                     if (!modulesUnlocked && nextMission.id !== MISSIONS[0].id) {
-                                      handleStartMission(''); // go back to curriculum to show the ad lock
+                                      startAd(nextMission.id);
                                     } else {
                                       handleStartMission(nextMission.id);
                                     }
