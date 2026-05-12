@@ -155,7 +155,7 @@ export const Sidebar: React.FC = () => {
                         <p className="text-[10px] text-yellow-700 mb-3 leading-tight relative z-10">Watch a short ad to permanently unlock all advanced modules and projects.</p>
                         <button 
                           onClick={() => {
-                            // [https://www.profitablecpmratenetwork.com/eptfdgegw?key=9029ed441555986ae5243084e752e0d5]
+                            // [INSERT_SMARTLINK_HERE]
                             // Examples:
                             // window.open('https://your-smartlink-url.com', '_blank');
                             unlockModules();
@@ -258,12 +258,26 @@ export const Sidebar: React.FC = () => {
                               <p className="text-[10px] font-bold text-excel-green uppercase mb-1">Concept Lesson:</p>
                               <p className="text-[11px] text-excel-text leading-relaxed">{currentMission.lesson || currentMission.description}</p>
                             </div>
-                            <button 
-                              onClick={() => setViewMode('task')}
-                              className="w-full bg-excel-green text-white py-2 rounded text-[11px] font-bold hover:bg-excel-green-dark transition-colors flex items-center justify-center gap-2"
-                            >
-                              <Play className="w-3 h-3" /> Start Practical Task
-                            </button>
+                            <div className="relative mt-4">
+                              <button 
+                                onClick={() => setViewMode('task')}
+                                className={`w-full bg-excel-green text-white py-2 rounded text-[11px] font-bold hover:bg-excel-green-dark transition-colors flex items-center justify-center gap-2 ${
+                                  completedMissions.length === 0 ? 'ring-2 ring-excel-green ring-offset-1 animate-pulse' : ''
+                                }`}
+                              >
+                                <Play className="w-3 h-3" /> Start Practical Task
+                              </button>
+                              {completedMissions.length === 0 && (
+                                <motion.div 
+                                  initial={{ opacity: 0, scale: 0.9 }}
+                                  animate={{ opacity: 1, scale: 1 }}
+                                  className="absolute -top-10 right-0 bg-orange-500 text-white text-[10px] font-bold px-2 py-1 rounded shadow-lg flex items-center gap-1 pointer-events-none z-10"
+                                >
+                                  Read the lesson, then click here! 👇
+                                  <div className="absolute -bottom-1 right-4 w-2 h-2 bg-orange-500 rotate-45" />
+                                </motion.div>
+                              )}
+                            </div>
                           </motion.div>
                         ) : (
                           <motion.div
@@ -271,12 +285,23 @@ export const Sidebar: React.FC = () => {
                             initial={{ opacity: 0, y: 5 }}
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -5 }}
-                            className="space-y-4"
+                            className="space-y-4 relative"
                           >
                             <p className="text-[12px] text-excel-text leading-tight">{currentMission.description}</p>
-                            <div className="bg-white/60 rounded p-2.5 border border-[#c5e0d1]">
+                            <div className="bg-white/60 rounded p-2.5 border border-[#c5e0d1] relative">
                               <p className="text-[10px] font-bold text-excel-green uppercase mb-1">Learning Task:</p>
                               <p className="text-[11px] text-excel-text font-medium italic">{currentMission.objective}</p>
+                              
+                              {completedMissions.length === 0 && (
+                                <motion.div 
+                                  initial={{ opacity: 0, x: 10 }}
+                                  animate={{ opacity: 1, x: 0 }}
+                                  className="absolute -left-4 top-1/2 -translate-x-full -translate-y-1/2 bg-blue-600 text-white p-2 rounded shadow-xl text-[11px] font-bold z-50 text-center pointer-events-none md:w-32 hidden md:block"
+                                >
+                                  👈 Go to the grid, double-click a cell, and type your answer!
+                                  <div className="absolute right-[-4px] top-1/2 -translate-y-1/2 w-2 h-2 bg-blue-600 rotate-45" />
+                                </motion.div>
+                              )}
                             </div>
   
                             {currentMission.objective.toLowerCase().includes('pivot') && activeTab !== 'pivot' && (
