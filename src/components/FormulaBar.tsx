@@ -32,6 +32,10 @@ export const FormulaBar: React.FC = () => {
         value={currentFormula}
         onChange={handleUpdate}
         placeholder="Enter value or formula (e.g. =SUM(A1:A5))"
+        autoCapitalize="none"
+        autoComplete="off"
+        autoCorrect="off"
+        spellCheck="false"
       />
     </div>
   );

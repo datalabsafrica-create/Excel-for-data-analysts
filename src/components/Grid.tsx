@@ -100,7 +100,13 @@ export const Grid: React.FC = () => {
                     isSelected && "ring-2 ring-excel-green-dark z-10 bg-excel-green-dark/5",
                     !isSelected && "hover:bg-gray-50"
                   )}
-                  onClick={(e) => handleCellClick(rowIndex, colIndex, e)}
+                  onClick={(e) => {
+                    if (isSelected && editingCell !== id) {
+                      handleDoubleClick(rowIndex, colIndex);
+                    } else {
+                      handleCellClick(rowIndex, colIndex, e);
+                    }
+                  }}
                   onDoubleClick={() => handleDoubleClick(rowIndex, colIndex)}
                 >
                   {editingCell === id ? (
@@ -114,6 +120,10 @@ export const Grid: React.FC = () => {
                         if (e.key === 'Enter') submitEdit();
                         if (e.key === 'Escape') setEditingCell(null);
                       }}
+                      autoCapitalize="none"
+                      autoComplete="off"
+                      autoCorrect="off"
+                      spellCheck="false"
                     />
                   ) : (
                     <span className="truncate">
