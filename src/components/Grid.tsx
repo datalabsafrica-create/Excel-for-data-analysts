@@ -5,18 +5,17 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useExcelStore } from '../store';
-import { COL_LABELS, INITIAL_ROWS, INITIAL_COLS, MISSIONS } from '../constants';
+import { COL_LABELS, INITIAL_ROWS, INITIAL_COLS } from '../constants';
 import { getCellId } from '../lib/formula';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
-import { motion, AnimatePresence } from 'motion/react';
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
 export const Grid: React.FC = () => {
-  const { grid, updateCell, selection, setSelection, completedMissions, currentMission } = useExcelStore();
+  const { grid, updateCell, selection, setSelection } = useExcelStore();
   const [editingCell, setEditingCell] = useState<string | null>(null);
   const [editValue, setEditValue] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
@@ -64,26 +63,10 @@ export const Grid: React.FC = () => {
 
   return (
     <div 
-      className="flex-1 overflow-auto bg-gray-50 p-4 relative"
+      className="flex-1 overflow-auto bg-gray-50 p-4"
       onKeyDown={handleKeyDown}
       tabIndex={0}
     >
-      <AnimatePresence>
-        {completedMissions.length === 0 && currentMission?.id === MISSIONS[0].id && !editingCell && (
-          <motion.div 
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0 }}
-            className="absolute top-8 left-[140px] z-50 pointer-events-none"
-          >
-            <div className="bg-blue-600 text-white p-3 rounded-lg shadow-2xl text-[12px] font-bold flex flex-col items-center animate-bounce">
-              <span>Double-click a cell (like A1) to type!</span>
-              <div className="absolute -bottom-2 w-4 h-4 bg-blue-600 rotate-45 transform origin-center" />
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       <div className="inline-grid border border-excel-border bg-white" 
            style={{ gridTemplateColumns: `40px repeat(${INITIAL_COLS}, 100px)` }}>
         
